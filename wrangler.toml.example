@@ -1,0 +1,12 @@
+name = "college-schedule"
+main = "worker/index.js"
+compatibility_date = "2026-09-01"
+
+[assets]
+directory = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "college-schedule"
+database_id = "YOUR_DATABASE_ID"
+remote = true

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Админка — Расписание</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+
+  <body>
+    <main class="admin">
+      <section id="login-section" class="admin-login">
+        <h1>Админка</h1>
+
+        <p class="admin-subtitle">Введите пароль для доступа</p>
+
+        <form id="login-form">
+          <input
+            id="password"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="current-password"
+            required
+          />
+
+          <button type="submit">Войти</button>
+        </form>
+
+        <div id="login-error" class="login-error"></div>
+      </section>
+
+      <section id="editor-section" class="admin-editor hidden">
+        <header class="admin-header">
+          <div>
+            <h1>Расписание</h1>
+
+            <p>Редактирование расписания</p>
+          </div>
+
+          <div class="admin-actions">
+            <a
+              href="/"
+              class="view-schedule-button"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Открыть расписание
+            </a>
+
+            <button id="save-all-button" class="save-all-button" disabled>
+              Сохранить всё
+            </button>
+
+            <button id="logout-button" class="logout-button">Выйти</button>
+          </div>
+        </header>
+
+        <div id="admin-schedule" class="admin-schedule">
+          <div class="loading">Загрузка...</div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/js/admin.js"></script>
+  </body>
+</html>
