@@ -951,3 +951,30 @@ body {
         transition: width 0.3s linear;
     }
 }
+
+
+@media (min-width: 1400px) {
+  .admin-lessons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.admin-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.admin-lesson {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+  
+}

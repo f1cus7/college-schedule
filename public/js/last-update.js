@@ -29,7 +29,7 @@ window.fetch = async (...args) => {
 
             if (data.last_updated && lastUpdateElement) {
                 lastUpdateElement.textContent =
-                    `Последнее обновление: ${formatLastUpdate(data.last_updated)} МСК`;
+                    `Последнее обновление: ${formatLastUpdate(data.last_updated)}`;
             }
         }
     } catch (error) {
