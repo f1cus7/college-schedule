@@ -1,10 +1,11 @@
-const CACHE_NAME = "college-schedule-v2";
+const CACHE_NAME = "college-schedule-v3";
 
 const APP_SHELL = [
     "/",
     "/index.html",
     "/css/style.css",
     "/js/schedule.js",
+    "/js/last-update.js",
     "/favicon.svg",
     "/manifest.json",
     "/icons/icon-192.png",
