@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Расписание">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
     <title>Расписание</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -22,6 +28,35 @@
       </div>
     </main>
 
+    <div id="lesson-sheet" class="lesson-sheet">
+      <div class="lesson-sheet-handle" aria-hidden="true"></div>
+
+      <button
+        type="button"
+        class="lesson-sheet-close"
+        id="lesson-sheet-close"
+        aria-label="Закрыть"
+      >
+        ×
+      </button>
+
+      <div class="lesson-sheet-content">
+        <div class="lesson-sheet-title" id="sheet-lesson-name">Урок</div>
+
+        <div class="lesson-sheet-meta" id="sheet-lesson-meta"></div>
+
+        <div class="lesson-sheet-remaining">
+          Осталось
+          <strong id="sheet-remaining"> 00:00 </strong>
+        </div>
+
+        <div class="lesson-progress">
+          <div class="lesson-progress-fill" id="lesson-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/schedule.js"></script>
     <script src="/js/schedule.js"></script>
   </body>
 </html>

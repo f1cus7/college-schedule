@@ -7,6 +7,9 @@ const days = [
 ];
 
 let currentMobileDay = new Date().getDay() - 1;
+let lessonSheetTimer = null;
+let lessonSheetShownFor = null;
+let lessonSheetDismissedFor = null;
 
 if (currentMobileDay < 0 || currentMobileDay > 4) {
     currentMobileDay = 0;
@@ -202,6 +205,7 @@ function escapeHtml(value) {
 }
 
 loadSchedule();
+updateLessonSheet();
 
 function isCurrentLesson(lesson) {
     const now = new Date();
@@ -281,10 +285,6 @@ function isCurrentLesson(lesson) {
     return nextLesson?.lesson.id === lesson.id;
 }
 
-setInterval(() => {
-    loadSchedule();
-}, 60000);
-
 function scrollToCurrentLesson() {
     if (window.innerWidth > 650) {
         return;
@@ -335,4 +335,320 @@ function isPassedLesson(lesson) {
         endHour * 60 + endMinute;
 
     return currentMinutes >= endMinutes;
+}
+
+function getLessonTime(lesson) {
+    if (!lesson?.time) {
+        return null;
+    }
+
+    const match = lesson.time.match(
+        /^(\d{1,2}):(\d{2})\s*[-–—]\s*(\d{1,2}):(\d{2})$/
+    );
+
+    if (!match) {
+        return null;
+    }
+
+    return {
+        start:
+            Number(match[1]) * 60 +
+            Number(match[2]),
+
+        end:
+            Number(match[3]) * 60 +
+            Number(match[4])
+    };
+}
+
+
+function getCurrentLesson() {
+    const now = new Date();
+
+    const currentDay = now.getDay() - 1;
+
+    if (currentDay < 0 || currentDay > 4) {
+        return null;
+    }
+
+    const currentMinutes =
+        now.getHours() * 60 + now.getMinutes();
+
+    const currentSeconds =
+        now.getSeconds();
+
+    const currentTotalSeconds =
+        currentMinutes * 60 + currentSeconds;
+
+    const lessonsToday = (window.currentLessons || [])
+        .filter(lesson =>
+            lesson.day === currentDay &&
+            lesson.time
+        );
+
+    for (const lesson of lessonsToday) {
+        const time = getLessonTime(lesson);
+
+        if (!time) {
+            continue;
+        }
+
+        const startSeconds = time.start * 60;
+        const endSeconds = time.end * 60;
+
+        if (
+            currentTotalSeconds >= startSeconds &&
+            currentTotalSeconds < endSeconds
+        ) {
+            return {
+                lesson,
+                startSeconds,
+                endSeconds,
+                currentTotalSeconds
+            };
+        }
+    }
+
+    return null;
+}
+
+
+function formatRemaining(seconds) {
+    seconds = Math.max(0, Math.floor(seconds));
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    return (
+        `${String(minutes).padStart(2, "0")}:` +
+        `${String(remainingSeconds).padStart(2, "0")}`
+    );
+}
+
+
+function updateLessonSheet() {
+    if (window.innerWidth > 650) {
+        return;
+    }
+
+    const sheet = document.querySelector("#lesson-sheet");
+    const title = document.querySelector("#sheet-lesson-name");
+    const meta = document.querySelector("#sheet-lesson-meta");
+    const remaining = document.querySelector("#sheet-remaining");
+    const progress = document.querySelector("#lesson-progress-fill");
+
+    if (!sheet || !title || !meta || !remaining || !progress) {
+        return;
+    }
+
+    const current = getCurrentLesson();
+
+    if (!current) {
+        hideLessonSheet();
+        return;
+    }
+
+    const {
+        lesson,
+        startSeconds,
+        endSeconds,
+        currentTotalSeconds
+    } = current;
+
+    const remainingSeconds =
+        endSeconds - currentTotalSeconds;
+
+    const duration =
+        endSeconds - startSeconds;
+
+    const elapsed =
+        currentTotalSeconds - startSeconds;
+
+    const percent = Math.min(
+        100,
+        Math.max(
+            0,
+            (elapsed / duration) * 100
+        )
+    );
+
+    title.textContent = lesson.name || "Урок";
+
+    meta.textContent = [
+        lesson.teacher,
+        lesson.room
+    ]
+        .filter(Boolean)
+        .join(" · ");
+
+    remaining.textContent =
+        `${formatRemaining(remainingSeconds)} мин`;
+
+    progress.style.width = `${percent}%`;
+
+    const lessonId = lesson.id;
+
+    // Новый урок
+    if (lessonSheetShownFor !== lessonId) {
+        lessonSheetShownFor = lessonId;
+
+        setTimeout(() => {
+            // Не показываем, если пользователь уже
+            // успел закрыть именно этот урок
+            if (lessonSheetDismissedFor !== lessonId) {
+                showLessonSheet();
+            }
+        }, 2000);
+    }
+}
+
+
+function showLessonSheet() {
+    if (window.innerWidth > 650) {
+        return;
+    }
+
+    const sheet = document.querySelector("#lesson-sheet");
+
+    if (!sheet) {
+        return;
+    }
+
+    sheet.classList.add("visible");
+}
+
+
+function hideLessonSheet() {
+    const sheet = document.querySelector("#lesson-sheet");
+
+    if (!sheet) {
+        return;
+    }
+
+    sheet.classList.remove("visible");
+}
+
+
+function setupLessonSheet() {
+    const sheet = document.querySelector("#lesson-sheet");
+    const closeButton = document.querySelector("#lesson-sheet-close");
+
+    if (!sheet || !closeButton) {
+        return;
+    }
+
+    closeButton.addEventListener("click", () => {
+        const current = getCurrentLesson();
+
+        if (current) {
+            lessonSheetDismissedFor =
+                current.lesson.id;
+        }
+
+        hideLessonSheet();
+    });
+
+
+    let startY = 0;
+    let currentY = 0;
+    let dragging = false;
+
+    sheet.addEventListener(
+        "touchstart",
+        event => {
+            startY = event.touches[0].clientY;
+            currentY = startY;
+            dragging = true;
+
+            sheet.style.transition = "none";
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    sheet.addEventListener(
+        "touchmove",
+        event => {
+            if (!dragging) {
+                return;
+            }
+
+            currentY = event.touches[0].clientY;
+
+            const deltaY =
+                Math.max(0, currentY - startY);
+
+            sheet.style.transform =
+                `translateY(${deltaY}px)`;
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    sheet.addEventListener(
+        "touchend",
+        () => {
+            if (!dragging) {
+                return;
+            }
+
+            dragging = false;
+
+            const deltaY =
+                currentY - startY;
+
+            sheet.style.transition =
+                "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
+
+            if (deltaY > 80) {
+                const current = getCurrentLesson();
+
+                if (current) {
+                    lessonSheetDismissedFor =
+                        current.lesson.id;
+                }
+
+                hideLessonSheet();
+
+                sheet.style.transform = "";
+            } else {
+                sheet.style.transform = "";
+            }
+        }
+    );
+}
+
+
+setupLessonSheet();
+
+
+
+setInterval(() => {
+    loadSchedule();
+}, 60000);
+
+setInterval(() => {
+    updateLessonSheet();
+}, 1000);
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+            .then(registration => {
+                console.log(
+                    "Service Worker зарегистрирован:",
+                    registration.scope
+                );
+            })
+            .catch(error => {
+                console.error(
+                    "Ошибка регистрации Service Worker:",
+                    error
+                );
+            });
+    });
 }

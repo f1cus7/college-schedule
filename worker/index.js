@@ -293,6 +293,50 @@ export default {
       }
     }
 
+    if (url.pathname === "/api/activity/token" && request.method === "POST") {
+  try {
+    const body = await request.json();
+
+    const token = String(body.token ?? "").trim();
+    const activityId = String(body.activity_id ?? "").trim();
+
+    if (!token) {
+      return json(
+        {
+          success: false,
+          error: "Токен не указан",
+        },
+        400,
+      );
+    }
+
+    await env.DB.prepare(
+      `
+        INSERT INTO activity_tokens (id, token, activity_id, updated_at)
+        VALUES (1, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          token = excluded.token,
+          activity_id = excluded.activity_id,
+          updated_at = excluded.updated_at
+      `,
+    )
+      .bind(token, activityId, Date.now())
+      .run();
+
+    return json({
+      success: true,
+    });
+  } catch (error) {
+    return json(
+      {
+        success: false,
+        error: error.message,
+      },
+      500,
+    );
+  }
+}
+
     if (url.pathname === "/api/logout" && request.method === "POST") {
       return json(
         {
