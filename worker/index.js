@@ -102,6 +102,57 @@ async function isAuthenticated(request, env) {
   return verifySessionToken(cookies.admin_token, env.ADMIN_PASSWORD);
 }
 
+async function getScheduleUpdatedAt(env) {
+  await env.DB.prepare(
+    `
+      CREATE TABLE IF NOT EXISTS schedule_meta (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        updated_at INTEGER NOT NULL
+      )
+    `,
+  ).run();
+
+  let row = await env.DB.prepare(
+    `SELECT updated_at FROM schedule_meta WHERE id = 1`,
+  ).first();
+
+  if (!row) {
+    const now = Date.now();
+
+    await env.DB.prepare(
+      `INSERT INTO schedule_meta (id, updated_at) VALUES (1, ?)`,
+    )
+      .bind(now)
+      .run();
+
+    row = { updated_at: now };
+  }
+
+  return row.updated_at;
+}
+
+async function updateScheduleTimestamp(env) {
+  await env.DB.prepare(
+    `
+      CREATE TABLE IF NOT EXISTS schedule_meta (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        updated_at INTEGER NOT NULL
+      )
+    `,
+  ).run();
+
+  await env.DB.prepare(
+    `
+      INSERT INTO schedule_meta (id, updated_at)
+      VALUES (1, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        updated_at = excluded.updated_at
+    `,
+  )
+    .bind(Date.now())
+    .run();
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -123,9 +174,12 @@ export default {
                     `,
         ).all();
 
+        const lastUpdated = await getScheduleUpdatedAt(env);
+
         return json({
           success: true,
           lessons: results,
+          last_updated: lastUpdated,
         });
       } catch (error) {
         return json(
@@ -230,11 +284,8 @@ export default {
         const body = await request.json();
 
         const name = String(body.name ?? "").trim();
-
         const teacher = String(body.teacher ?? "").trim();
-
         const room = String(body.room ?? "").trim();
-
         const time = String(body.time ?? "").trim();
 
         await env.DB.prepare(
@@ -278,6 +329,8 @@ export default {
           );
         }
 
+        await updateScheduleTimestamp(env);
+
         return json({
           success: true,
           lesson,
@@ -294,48 +347,48 @@ export default {
     }
 
     if (url.pathname === "/api/activity/token" && request.method === "POST") {
-  try {
-    const body = await request.json();
+      try {
+        const body = await request.json();
 
-    const token = String(body.token ?? "").trim();
-    const activityId = String(body.activity_id ?? "").trim();
+        const token = String(body.token ?? "").trim();
+        const activityId = String(body.activity_id ?? "").trim();
 
-    if (!token) {
-      return json(
-        {
-          success: false,
-          error: "Токен не указан",
-        },
-        400,
-      );
+        if (!token) {
+          return json(
+            {
+              success: false,
+              error: "Токен не указан",
+            },
+            400,
+          );
+        }
+
+        await env.DB.prepare(
+          `
+            INSERT INTO activity_tokens (id, token, activity_id, updated_at)
+            VALUES (1, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              token = excluded.token,
+              activity_id = excluded.activity_id,
+              updated_at = excluded.updated_at
+          `,
+        )
+          .bind(token, activityId, Date.now())
+          .run();
+
+        return json({
+          success: true,
+        });
+      } catch (error) {
+        return json(
+          {
+            success: false,
+            error: error.message,
+          },
+          500,
+        );
+      }
     }
-
-    await env.DB.prepare(
-      `
-        INSERT INTO activity_tokens (id, token, activity_id, updated_at)
-        VALUES (1, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          token = excluded.token,
-          activity_id = excluded.activity_id,
-          updated_at = excluded.updated_at
-      `,
-    )
-      .bind(token, activityId, Date.now())
-      .run();
-
-    return json({
-      success: true,
-    });
-  } catch (error) {
-    return json(
-      {
-        success: false,
-        error: error.message,
-      },
-      500,
-    );
-  }
-}
 
     if (url.pathname === "/api/logout" && request.method === "POST") {
       return json(
