@@ -15,3 +15,8 @@ CREATE TABLE IF NOT EXISTS activity_tokens (
     activity_id TEXT NOT NULL DEFAULT '',
     updated_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS schedule_meta (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    updated_at INTEGER NOT NULL
+);
