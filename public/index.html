@@ -13,12 +13,14 @@
     <title>Расписание</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/last-update.css" />
   </head>
 
   <body>
     <main class="schedule">
       <header class="schedule-header">
         <h1>Расписание</h1>
+        <div id="last-update" class="last-update">Последнее обновление: —</div>
       </header>
 
       <div id="mobile-days" class="mobile-days"></div>
@@ -56,6 +58,7 @@
       </div>
     </div>
 
+    <script src="/js/last-update.js"></script>
     <script src="/js/schedule.js"></script>
   </body>
 </html>
