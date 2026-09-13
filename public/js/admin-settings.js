@@ -1,12 +1,6 @@
 const TIME_MODES = [
-  {
-    value: "automatic",
-    label: "Автоматически",
-  },
-  {
-    value: "manual",
-    label: "Вручную",
-  },
+  { value: "automatic", label: "Автоматически" },
+  { value: "manual", label: "Вручную" },
 ];
 
 const timeFormatButton = document.querySelector("#time-format-button");
@@ -17,26 +11,16 @@ if (timeFormatButton) {
 
   function updateButton() {
     const mode = TIME_MODES.find((item) => item.value === currentMode);
-
-    timeFormatButton.textContent = `Время: ${mode?.label ?? TIME_MODES[0].label}`;
+    timeFormatButton.textContent = `Время: ${mode?.label ?? "Автоматически"}`;
+    document.body.dataset.timeMode = currentMode;
   }
 
   async function loadTimeMode() {
     try {
-      const response = await fetch("/api/settings", {
-        credentials: "include",
-      });
-
+      const response = await fetch("/api/settings", { credentials: "include" });
       const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Не удалось загрузить режим времени");
-      }
-
-      currentMode = TIME_MODES.some((item) => item.value === data.time_mode)
-        ? data.time_mode
-        : "automatic";
-
+      if (!response.ok || !data.success) throw new Error(data.error || "Не удалось загрузить режим времени");
+      currentMode = TIME_MODES.some((item) => item.value === data.time_mode) ? data.time_mode : "automatic";
       updateButton();
     } catch (error) {
       console.error(error);
@@ -44,17 +28,8 @@ if (timeFormatButton) {
   }
 
   async function saveTimeMode() {
-    if (saving) {
-      return;
-    }
-
-    const currentIndex = TIME_MODES.findIndex(
-      (item) => item.value === currentMode,
-    );
-
-    const nextIndex = (currentIndex + 1) % TIME_MODES.length;
-    const nextMode = TIME_MODES[nextIndex].value;
-
+    if (saving) return;
+    const nextMode = currentMode === "automatic" ? "manual" : "automatic";
     saving = true;
     timeFormatButton.disabled = true;
 
@@ -62,26 +37,14 @@ if (timeFormatButton) {
       const response = await fetch("/api/settings", {
         method: "PUT",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          time_mode: nextMode,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ time_mode: nextMode }),
       });
-
       const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Не удалось сохранить режим времени");
-      }
-
+      if (!response.ok || !data.success) throw new Error(data.error || "Не удалось сохранить режим времени");
       currentMode = data.time_mode;
       updateButton();
-
-      if (typeof loadSchedule === "function") {
-        await loadSchedule();
-      }
+      if (typeof loadSchedule === "function") await loadSchedule();
     } catch (error) {
       console.error(error);
       alert(error.message || "Не удалось изменить режим времени");
