@@ -3,10 +3,88 @@
   display: none;
 }
 
+body[data-time-mode="manual"] .admin-lesson .lesson-time,
+body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
+  display: flex;
+}
+
 .time-format-button {
+  min-height: 40px;
+  padding: 9px 14px;
+
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+
+  background: #fff;
+  color: #111;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.time-format-button:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #cfcfcf;
+  transform: translateY(-1px);
+}
+
+.time-format-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .time-format-button:disabled {
+  opacity: 0.5;
   cursor: wait;
+}
+
+@media (max-width: 900px) {
+  .admin-header {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .admin-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-header {
+    flex-direction: column;
+  }
+
+  .admin-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-actions > * {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .time-format-button,
+  .view-schedule-button,
+  .save-all-button,
+  .logout-button {
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-actions {
+    grid-template-columns: 1fr;
+  }
 }
