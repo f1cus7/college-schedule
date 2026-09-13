@@ -500,12 +500,6 @@ body {
   font-size: 12px;
 }
 
-@media (max-width: 900px) {
-  .save-lesson {
-    align-self: stretch;
-  }
-}
-
 .admin-actions {
   display: flex;
   align-items: center;
