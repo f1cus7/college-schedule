@@ -137,8 +137,8 @@ function getLessonTime(lessonNumber, format = "long") {
 
 function hasLessonData(lesson) {
   return Boolean(
-    String(lesson.name ?? "").trim() &&
-      String(lesson.teacher ?? "").trim() &&
+    String(lesson.name ?? "").trim() ||
+      String(lesson.teacher ?? "").trim() ||
       String(lesson.room ?? "").trim(),
   );
 }
@@ -441,20 +441,26 @@ export default {
         const teacher = String(body.teacher ?? "").trim();
         const room = String(body.room ?? "").trim();
         const timeFormat = await getTimeFormat(env);
-        const time =
-          name && teacher && room
-            ? getLessonTime(
-                Number(
-                  await env.DB.prepare(
-                    `SELECT lesson_number FROM lessons WHERE id = ?`,
-                  )
-                    .bind(Number(id))
-                    .first()
-                    .then((lesson) => lesson?.lesson_number ?? 0),
-                ),
-                timeFormat,
-              )
-            : "";
+
+        const lessonInfo = await env.DB.prepare(
+          `SELECT lesson_number FROM lessons WHERE id = ?`,
+        )
+          .bind(Number(id))
+          .first();
+
+        if (!lessonInfo) {
+          return json(
+            {
+              success: false,
+              error: "Урок не найден",
+            },
+            404,
+          );
+        }
+
+        const time = hasLessonData({ name, teacher, room })
+          ? getLessonTime(lessonInfo.lesson_number, timeFormat)
+          : "";
 
         await env.DB.prepare(
           `
@@ -470,42 +476,18 @@ export default {
           .bind(name, teacher, room, time, Number(id))
           .run();
 
-        const lesson = await env.DB.prepare(
-          `
-            SELECT
-              id,
-              day,
-              lesson_number,
-              name,
-              teacher,
-              room,
-              time
-            FROM lessons
-            WHERE id = ?
-          `,
-        )
-          .bind(Number(id))
-          .first();
-
-        if (!lesson) {
-          return json(
-            {
-              success: false,
-              error: "Урок не найден",
-            },
-            404,
-          );
-        }
-
         await updateScheduleTimestamp(env);
 
         return json({
           success: true,
           lesson: {
-            ...lesson,
-            time: hasLessonData(lesson)
-              ? getLessonTime(lesson.lesson_number, timeFormat)
-              : "",
+            id: Number(id),
+            day: undefined,
+            lesson_number: lessonInfo.lesson_number,
+            name,
+            teacher,
+            room,
+            time,
           },
         });
       } catch (error) {
