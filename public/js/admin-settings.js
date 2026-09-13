@@ -62,7 +62,7 @@ if (timeFormatButton) {
 
 if (dayColorsButton) {
   const storageKey = "admin-day-colors";
-  let enabled = localStorage.getItem(storageKey) !== "off";
+  let enabled = localStorage.getItem(storageKey) === "on";
 
   function updateDayColors() {
     document.body.dataset.dayColors = enabled ? "on" : "off";
