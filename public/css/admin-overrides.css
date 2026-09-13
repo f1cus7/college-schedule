@@ -1,0 +1,12 @@
+.admin-lesson .lesson-time,
+.admin-lesson label:has(.lesson-time) {
+  display: none;
+}
+
+.time-format-button {
+  cursor: pointer;
+}
+
+.time-format-button:disabled {
+  cursor: wait;
+}
