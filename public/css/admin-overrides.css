@@ -8,7 +8,8 @@ body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
   display: flex;
 }
 
-.time-format-button {
+.time-format-button,
+.day-colors-button {
   min-height: 40px;
   padding: 9px 14px;
 
@@ -31,19 +32,52 @@ body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
     transform 0.15s ease;
 }
 
-.time-format-button:hover:not(:disabled) {
+.time-format-button:hover:not(:disabled),
+.day-colors-button:hover:not(:disabled) {
   background: #f5f5f5;
   border-color: #cfcfcf;
   transform: translateY(-1px);
 }
 
-.time-format-button:active:not(:disabled) {
+.time-format-button:active:not(:disabled),
+.day-colors-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.time-format-button:disabled {
+.time-format-button:disabled,
+.day-colors-button:disabled {
   opacity: 0.5;
   cursor: wait;
+}
+
+body[data-day-colors="on"] .admin-day-title {
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-day-title {
+  background: #eaf2ff;
+  color: #365d8d;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-day-title {
+  background: #eaf7ef;
+  color: #397052;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-day-title {
+  background: #fff7d9;
+  color: #7b6725;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-day-title {
+  background: #f1ecff;
+  color: #654f91;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-day-title {
+  background: #ffedf1;
+  color: #925567;
 }
 
 @media (max-width: 900px) {
@@ -76,6 +110,7 @@ body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
   }
 
   .time-format-button,
+  .day-colors-button,
   .view-schedule-button,
   .save-all-button,
   .logout-button {
