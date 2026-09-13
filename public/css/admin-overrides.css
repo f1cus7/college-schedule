@@ -106,7 +106,179 @@ body[data-day-colors="on"] .admin-day-5 .admin-lesson {
   border-color: #f2dfe5;
 }
 
+body[data-day-colors="on"] .admin-day-1 .admin-lesson,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson {
+  color: inherit;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-lesson input,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson textarea,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson select,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson .admin-lesson-number {
+  background: #edf4ff;
+  border-color: #cfdef2;
+  color: #365d8d;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-lesson input,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson textarea,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson select,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson .admin-lesson-number {
+  background: #edf8f1;
+  border-color: #cfe4d6;
+  color: #397052;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-lesson input,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson textarea,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson select,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson .admin-lesson-number {
+  background: #fff9df;
+  border-color: #eadfae;
+  color: #7b6725;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-lesson input,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson textarea,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson select,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson .admin-lesson-number {
+  background: #f5f1ff;
+  border-color: #dfd4f4;
+  color: #654f91;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-lesson input,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson textarea,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson select,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson .admin-lesson-number {
+  background: #fff1f4;
+  border-color: #edd5dd;
+  color: #925567;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-lesson input::placeholder,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson textarea::placeholder {
+  color: #7f9abd;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-lesson input::placeholder,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson textarea::placeholder {
+  color: #7ca88e;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-lesson input::placeholder,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson textarea::placeholder {
+  color: #aa9858;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-lesson input::placeholder,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson textarea::placeholder {
+  color: #9584b9;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-lesson input::placeholder,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson textarea::placeholder {
+  color: #b18797;
+}
+
+body[data-day-colors="on"] .admin-day-1 .save-lesson-button {
+  background: #e6f0ff;
+  border-color: #cbdcf5;
+  color: #365d8d;
+}
+
+body[data-day-colors="on"] .admin-day-2 .save-lesson-button {
+  background: #e6f5eb;
+  border-color: #cbe1d2;
+  color: #397052;
+}
+
+body[data-day-colors="on"] .admin-day-3 .save-lesson-button {
+  background: #fff6d5;
+  border-color: #e9dda7;
+  color: #7b6725;
+}
+
+body[data-day-colors="on"] .admin-day-4 .save-lesson-button {
+  background: #efe9ff;
+  border-color: #dcd1f1;
+  color: #654f91;
+}
+
+body[data-day-colors="on"] .admin-day-5 .save-lesson-button {
+  background: #ffeaf0;
+  border-color: #ebd2dc;
+  color: #925567;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-lesson-number {
+  background: #e5efff;
+  border-color: #cbdcf5;
+  color: #365d8d;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-lesson-number {
+  background: #e5f5ea;
+  border-color: #cbe1d2;
+  color: #397052;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-lesson-number {
+  background: #fff5d2;
+  border-color: #e9dda7;
+  color: #7b6725;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-lesson-number {
+  background: #eee8ff;
+  border-color: #dcd1f1;
+  color: #654f91;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-lesson-number {
+  background: #ffe9ef;
+  border-color: #ebd2dc;
+  color: #925567;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-lesson label,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson .lesson-time,
+body[data-day-colors="on"] .admin-day-1 .admin-lesson .admin-lesson-title {
+  color: #365d8d;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-lesson label,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson .lesson-time,
+body[data-day-colors="on"] .admin-day-2 .admin-lesson .admin-lesson-title {
+  color: #397052;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-lesson label,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson .lesson-time,
+body[data-day-colors="on"] .admin-day-3 .admin-lesson .admin-lesson-title {
+  color: #7b6725;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-lesson label,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson .lesson-time,
+body[data-day-colors="on"] .admin-day-4 .admin-lesson .admin-lesson-title {
+  color: #654f91;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-lesson label,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson .lesson-time,
+body[data-day-colors="on"] .admin-day-5 .admin-lesson .admin-lesson-title {
+  color: #925567;
+}
+
 @media (max-width: 650px) {
+  .admin-day-title {
+    cursor: pointer;
+  }
+
   .admin-lessons {
     display: grid;
     grid-template-rows: 1fr;
