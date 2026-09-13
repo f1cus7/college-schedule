@@ -4,6 +4,7 @@ const TIME_MODES = [
 ];
 
 const timeFormatButton = document.querySelector("#time-format-button");
+const dayColorsButton = document.querySelector("#day-colors-button");
 
 if (timeFormatButton) {
   let currentMode = "automatic";
@@ -57,4 +58,22 @@ if (timeFormatButton) {
   timeFormatButton.addEventListener("click", saveTimeMode);
   updateButton();
   loadTimeMode();
+}
+
+if (dayColorsButton) {
+  const storageKey = "admin-day-colors";
+  let enabled = localStorage.getItem(storageKey) !== "off";
+
+  function updateDayColors() {
+    document.body.dataset.dayColors = enabled ? "on" : "off";
+    dayColorsButton.textContent = `Цвета дней: ${enabled ? "Вкл" : "Выкл"}`;
+  }
+
+  dayColorsButton.addEventListener("click", () => {
+    enabled = !enabled;
+    localStorage.setItem(storageKey, enabled ? "on" : "off");
+    updateDayColors();
+  });
+
+  updateDayColors();
 }
