@@ -1,31 +1,27 @@
-const TIME_FORMATS = [
+const TIME_MODES = [
   {
-    value: "long",
-    label: "09:00 — 09:45",
+    value: "automatic",
+    label: "Автоматически",
   },
   {
-    value: "compact",
-    label: "09:00–09:45",
-  },
-  {
-    value: "hyphen",
-    label: "09:00 - 09:45",
+    value: "manual",
+    label: "Вручную",
   },
 ];
 
 const timeFormatButton = document.querySelector("#time-format-button");
 
 if (timeFormatButton) {
-  let currentFormat = "long";
+  let currentMode = "automatic";
   let saving = false;
 
   function updateButton() {
-    const format = TIME_FORMATS.find((item) => item.value === currentFormat);
+    const mode = TIME_MODES.find((item) => item.value === currentMode);
 
-    timeFormatButton.textContent = `Формат: ${format?.label ?? TIME_FORMATS[0].label}`;
+    timeFormatButton.textContent = `Время: ${mode?.label ?? TIME_MODES[0].label}`;
   }
 
-  async function loadTimeFormat() {
+  async function loadTimeMode() {
     try {
       const response = await fetch("/api/settings", {
         credentials: "include",
@@ -34,12 +30,12 @@ if (timeFormatButton) {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Не удалось загрузить формат времени");
+        throw new Error(data.error || "Не удалось загрузить режим времени");
       }
 
-      currentFormat = TIME_FORMATS.some((item) => item.value === data.time_format)
-        ? data.time_format
-        : "long";
+      currentMode = TIME_MODES.some((item) => item.value === data.time_mode)
+        ? data.time_mode
+        : "automatic";
 
       updateButton();
     } catch (error) {
@@ -47,17 +43,17 @@ if (timeFormatButton) {
     }
   }
 
-  async function saveTimeFormat() {
+  async function saveTimeMode() {
     if (saving) {
       return;
     }
 
-    const currentIndex = TIME_FORMATS.findIndex(
-      (item) => item.value === currentFormat,
+    const currentIndex = TIME_MODES.findIndex(
+      (item) => item.value === currentMode,
     );
 
-    const nextIndex = (currentIndex + 1) % TIME_FORMATS.length;
-    const nextFormat = TIME_FORMATS[nextIndex].value;
+    const nextIndex = (currentIndex + 1) % TIME_MODES.length;
+    const nextMode = TIME_MODES[nextIndex].value;
 
     saving = true;
     timeFormatButton.disabled = true;
@@ -70,17 +66,17 @@ if (timeFormatButton) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          time_format: nextFormat,
+          time_mode: nextMode,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Не удалось сохранить формат времени");
+        throw new Error(data.error || "Не удалось сохранить режим времени");
       }
 
-      currentFormat = data.time_format;
+      currentMode = data.time_mode;
       updateButton();
 
       if (typeof loadSchedule === "function") {
@@ -88,14 +84,14 @@ if (timeFormatButton) {
       }
     } catch (error) {
       console.error(error);
-      alert(error.message || "Не удалось изменить формат времени");
+      alert(error.message || "Не удалось изменить режим времени");
     } finally {
       saving = false;
       timeFormatButton.disabled = false;
     }
   }
 
-  timeFormatButton.addEventListener("click", saveTimeFormat);
+  timeFormatButton.addEventListener("click", saveTimeMode);
   updateButton();
-  loadTimeFormat();
+  loadTimeMode();
 }
