@@ -100,7 +100,7 @@ function renderSchedule(lessons) {
 
     const column = document.createElement("section");
 
-    column.className = "admin-day";
+    column.className = `admin-day admin-day-${day + 1}`;
 
     column.innerHTML = `
     <button
