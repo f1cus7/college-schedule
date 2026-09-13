@@ -12,24 +12,17 @@ body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
 .day-colors-button {
   min-height: 40px;
   padding: 9px 14px;
-
   border: 1px solid #dcdcdc;
   border-radius: 10px;
-
   background: #fff;
   color: #111;
-
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .time-format-button:hover:not(:disabled),
@@ -48,6 +41,14 @@ body[data-time-mode="manual"] .admin-lesson label:has(.lesson-time) {
 .day-colors-button:disabled {
   opacity: 0.5;
   cursor: wait;
+}
+
+.admin-day-title {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: default;
 }
 
 body[data-day-colors="on"] .admin-day-title {
@@ -78,6 +79,49 @@ body[data-day-colors="on"] .admin-day-4 .admin-day-title {
 body[data-day-colors="on"] .admin-day-5 .admin-day-title {
   background: #ffedf1;
   color: #925567;
+}
+
+body[data-day-colors="on"] .admin-day-1 .admin-lesson {
+  background: #f7faff;
+  border-color: #dce9fb;
+}
+
+body[data-day-colors="on"] .admin-day-2 .admin-lesson {
+  background: #f7fcf8;
+  border-color: #dcefe2;
+}
+
+body[data-day-colors="on"] .admin-day-3 .admin-lesson {
+  background: #fffdf4;
+  border-color: #f1e8bf;
+}
+
+body[data-day-colors="on"] .admin-day-4 .admin-lesson {
+  background: #faf8ff;
+  border-color: #e6defa;
+}
+
+body[data-day-colors="on"] .admin-day-5 .admin-lesson {
+  background: #fff8fa;
+  border-color: #f2dfe5;
+}
+
+@media (max-width: 650px) {
+  .admin-lessons {
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+    transition: grid-template-rows 0.32s ease, opacity 0.25s ease;
+  }
+
+  .admin-lessons > * {
+    min-height: 0;
+  }
+
+  .admin-lessons.day-collapsed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
 }
 
 @media (max-width: 900px) {
