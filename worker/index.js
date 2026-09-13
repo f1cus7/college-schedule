@@ -1,4 +1,17 @@
-const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 часа
+const SESSION_DURATION = 24 * 60 * 60 * 1000;
+
+const LESSON_TIMES = {
+  1: ["09:00", "09:45"],
+  2: ["09:55", "10:40"],
+  3: ["10:50", "11:35"],
+  4: ["11:55", "12:40"],
+  5: ["13:00", "13:45"],
+  6: ["14:00", "14:45"],
+  7: ["14:55", "15:40"],
+  8: ["15:45", "16:30"],
+};
+
+const TIME_FORMATS = ["long", "compact", "hyphen"];
 
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -102,6 +115,85 @@ async function isAuthenticated(request, env) {
   return verifySessionToken(cookies.admin_token, env.ADMIN_PASSWORD);
 }
 
+function getLessonTime(lessonNumber, format = "long") {
+  const time = LESSON_TIMES[lessonNumber];
+
+  if (!time) {
+    return "";
+  }
+
+  const [start, end] = time;
+
+  if (format === "compact") {
+    return `${start}–${end}`;
+  }
+
+  if (format === "hyphen") {
+    return `${start} - ${end}`;
+  }
+
+  return `${start} — ${end}`;
+}
+
+function hasLessonData(lesson) {
+  return Boolean(
+    String(lesson.name ?? "").trim() &&
+      String(lesson.teacher ?? "").trim() &&
+      String(lesson.room ?? "").trim(),
+  );
+}
+
+async function getTimeFormat(env) {
+  await env.DB.prepare(
+    `
+      CREATE TABLE IF NOT EXISTS schedule_settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        time_format TEXT NOT NULL DEFAULT 'long'
+      )
+    `,
+  ).run();
+
+  let row = await env.DB.prepare(
+    `SELECT time_format FROM schedule_settings WHERE id = 1`,
+  ).first();
+
+  if (!row) {
+    await env.DB.prepare(
+      `INSERT INTO schedule_settings (id, time_format) VALUES (1, 'long')`,
+    ).run();
+
+    row = { time_format: "long" };
+  }
+
+  return TIME_FORMATS.includes(row.time_format) ? row.time_format : "long";
+}
+
+async function updateTimeFormat(env, timeFormat) {
+  if (!TIME_FORMATS.includes(timeFormat)) {
+    throw new Error("Некорректный формат времени");
+  }
+
+  await env.DB.prepare(
+    `
+      CREATE TABLE IF NOT EXISTS schedule_settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        time_format TEXT NOT NULL DEFAULT 'long'
+      )
+    `,
+  ).run();
+
+  await env.DB.prepare(
+    `
+      INSERT INTO schedule_settings (id, time_format)
+      VALUES (1, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        time_format = excluded.time_format
+    `,
+  )
+    .bind(timeFormat)
+    .run();
+}
+
 async function getScheduleUpdatedAt(env) {
   await env.DB.prepare(
     `
@@ -161,25 +253,34 @@ export default {
       try {
         const { results } = await env.DB.prepare(
           `
-                        SELECT
-                            id,
-                            day,
-                            lesson_number,
-                            name,
-                            teacher,
-                            room,
-                            time
-                        FROM lessons
-                        ORDER BY day, lesson_number
-                    `,
+            SELECT
+              id,
+              day,
+              lesson_number,
+              name,
+              teacher,
+              room,
+              time
+            FROM lessons
+            ORDER BY day, lesson_number
+          `,
         ).all();
 
+        const timeFormat = await getTimeFormat(env);
         const lastUpdated = await getScheduleUpdatedAt(env);
+
+        const formattedResults = results.map((lesson) => ({
+          ...lesson,
+          time: hasLessonData(lesson)
+            ? getLessonTime(lesson.lesson_number, timeFormat)
+            : "",
+        }));
 
         return json({
           success: true,
-          lessons: results,
+          lessons: formattedResults,
           last_updated: lastUpdated,
+          time_format: timeFormat,
         });
       } catch (error) {
         return json(
@@ -188,6 +289,60 @@ export default {
             error: error.message,
           },
           500,
+        );
+      }
+    }
+
+    if (url.pathname === "/api/settings" && request.method === "GET") {
+      try {
+        const timeFormat = await getTimeFormat(env);
+
+        return json({
+          success: true,
+          time_format: timeFormat,
+        });
+      } catch (error) {
+        return json(
+          {
+            success: false,
+            error: error.message,
+          },
+          500,
+        );
+      }
+    }
+
+    if (url.pathname === "/api/settings" && request.method === "PUT") {
+      const authenticated = await isAuthenticated(request, env);
+
+      if (!authenticated) {
+        return json(
+          {
+            success: false,
+            error: "Необходима авторизация",
+          },
+          401,
+        );
+      }
+
+      try {
+        const body = await request.json();
+        const timeFormat = String(body.time_format ?? "");
+
+        await updateTimeFormat(env, timeFormat);
+        await updateScheduleTimestamp(env);
+
+        return json({
+          success: true,
+          time_format: timeFormat,
+        });
+      } catch (error) {
+        return json(
+          {
+            success: false,
+            error: error.message,
+          },
+          400,
         );
       }
     }
@@ -204,7 +359,6 @@ export default {
     if (url.pathname === "/api/login" && request.method === "POST") {
       try {
         const body = await request.json();
-
         const password = String(body.password ?? "");
 
         if (!password) {
@@ -286,35 +440,49 @@ export default {
         const name = String(body.name ?? "").trim();
         const teacher = String(body.teacher ?? "").trim();
         const room = String(body.room ?? "").trim();
-        const time = String(body.time ?? "").trim();
+        const timeFormat = await getTimeFormat(env);
+        const time =
+          name && teacher && room
+            ? getLessonTime(
+                Number(
+                  await env.DB.prepare(
+                    `SELECT lesson_number FROM lessons WHERE id = ?`,
+                  )
+                    .bind(Number(id))
+                    .first()
+                    .then((lesson) => lesson?.lesson_number ?? 0),
+                ),
+                timeFormat,
+              )
+            : "";
 
         await env.DB.prepare(
           `
-                        UPDATE lessons
-                        SET
-                            name = ?,
-                            teacher = ?,
-                            room = ?,
-                            time = ?
-                        WHERE id = ?
-                    `,
+            UPDATE lessons
+            SET
+              name = ?,
+              teacher = ?,
+              room = ?,
+              time = ?
+            WHERE id = ?
+          `,
         )
           .bind(name, teacher, room, time, Number(id))
           .run();
 
         const lesson = await env.DB.prepare(
           `
-                        SELECT
-                            id,
-                            day,
-                            lesson_number,
-                            name,
-                            teacher,
-                            room,
-                            time
-                        FROM lessons
-                        WHERE id = ?
-                    `,
+            SELECT
+              id,
+              day,
+              lesson_number,
+              name,
+              teacher,
+              room,
+              time
+            FROM lessons
+            WHERE id = ?
+          `,
         )
           .bind(Number(id))
           .first();
@@ -333,7 +501,12 @@ export default {
 
         return json({
           success: true,
-          lesson,
+          lesson: {
+            ...lesson,
+            time: hasLessonData(lesson)
+              ? getLessonTime(lesson.lesson_number, timeFormat)
+              : "",
+          },
         });
       } catch (error) {
         return json(
@@ -349,7 +522,6 @@ export default {
     if (url.pathname === "/api/activity/token" && request.method === "POST") {
       try {
         const body = await request.json();
-
         const token = String(body.token ?? "").trim();
         const activityId = String(body.activity_id ?? "").trim();
 
