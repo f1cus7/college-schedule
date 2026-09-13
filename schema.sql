@@ -20,3 +20,8 @@ CREATE TABLE IF NOT EXISTS schedule_meta (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     updated_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS schedule_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    time_format TEXT NOT NULL DEFAULT 'long'
+);
