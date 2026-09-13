@@ -27,15 +27,28 @@ async function validToken(value, secret) {
 async function auth(request, env) { return validToken(cookies(request).admin_token, env.ADMIN_PASSWORD); }
 function lessonTime(number) { const t = LESSON_TIMES[number]; return t ? `${t[0]} — ${t[1]}` : ""; }
 function hasLessonData(lesson) { return Boolean(String(lesson.name ?? "").trim() || String(lesson.teacher ?? "").trim() || String(lesson.room ?? "").trim()); }
-async function getTimeMode(env) {
+
+async function ensureSettingsTable(env) {
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS schedule_settings (id INTEGER PRIMARY KEY CHECK (id = 1), time_mode TEXT NOT NULL DEFAULT 'automatic')`).run();
+
+  try {
+    await env.DB.prepare(`ALTER TABLE schedule_settings ADD COLUMN time_mode TEXT NOT NULL DEFAULT 'automatic'`).run();
+  } catch {
+  }
+}
+
+async function getTimeMode(env) {
+  await ensureSettingsTable(env);
   let row = await env.DB.prepare(`SELECT time_mode FROM schedule_settings WHERE id = 1`).first();
-  if (!row) { await env.DB.prepare(`INSERT INTO schedule_settings (id, time_mode) VALUES (1, 'automatic')`).run(); row = {time_mode:"automatic"}; }
+  if (!row) {
+    await env.DB.prepare(`INSERT INTO schedule_settings (id, time_mode) VALUES (1, 'automatic')`).run();
+    row = {time_mode:"automatic"};
+  }
   return TIME_MODES.includes(row.time_mode) ? row.time_mode : "automatic";
 }
 async function setTimeMode(env, mode) {
   if (!TIME_MODES.includes(mode)) throw new Error("Некорректный режим времени");
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS schedule_settings (id INTEGER PRIMARY KEY CHECK (id = 1), time_mode TEXT NOT NULL DEFAULT 'automatic')`).run();
+  await ensureSettingsTable(env);
   await env.DB.prepare(`INSERT INTO schedule_settings (id,time_mode) VALUES (1,?) ON CONFLICT(id) DO UPDATE SET time_mode=excluded.time_mode`).bind(mode).run();
 }
 async function updatedAt(env) {
